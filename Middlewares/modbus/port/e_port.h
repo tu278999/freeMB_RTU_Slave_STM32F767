@@ -28,9 +28,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-
 #include "mbconfig.h"
-
 #include "main.h"
 
 
@@ -41,8 +39,9 @@
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
-#define huartused	huart3
+#define uartslave	huart3
 #define PORT_USE_UART2	0	// 0 means using uart3 for modbus rtu slave
+#define MB_USE_RS485	0
 
 
 typedef uint8_t BOOL;

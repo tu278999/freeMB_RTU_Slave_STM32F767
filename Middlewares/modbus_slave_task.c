@@ -38,7 +38,7 @@ void slavepoll_task(void*p){
 	  usSRegInBuf[0] = 0x11;
 	  usSRegInBuf[1] = 0x22;
 	  usSRegInBuf[2] = 0x33;
-	  usSRegInBuf[3] = 0x44;
+	  usSRegInBuf[3] = 	0x44;
 	  usSRegHoldBuf[0] = 0x1111;
 	  usSRegHoldBuf[1] = 0x2222;
 	  ucSDiscInBuf[0] = 0xAA;

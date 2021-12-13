@@ -212,6 +212,15 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
         ucRTUBuf[usSndBufferCount++] = ( UCHAR )( usCRC16 & 0xFF );
         ucRTUBuf[usSndBufferCount++] = ( UCHAR )( usCRC16 >> 8 );
 
+#if MB_USE_RS485
+
+        /*NOTE: the following instruction must be added when use RS485 module
+         * cause when MB Poll receive response frame, it lose the last byte which is
+         * High byte CRC
+         */
+        ucRTUBuf[usSndBufferCount++] = ( UCHAR )( usCRC16 >> 8 );
+
+#endif
         /* Activate the transmitter. */
         eSndState = STATE_TX_XMIT;
         vMBPortSerialEnable( FALSE, TRUE );//turn off receiver
@@ -225,7 +234,7 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
 }
 
 BOOL
-xMBRTUReceiveFSM( void )		//run in UART_ISR - thread mode
+xMBRTUReceiveFSM( void )		//run in UART_ISR - handler mode
 {
     BOOL            xTaskNeedSwitch = FALSE;
     UCHAR           ucByte;
@@ -285,7 +294,7 @@ xMBRTUReceiveFSM( void )		//run in UART_ISR - thread mode
 }
 
 BOOL
-xMBRTUTransmitFSM( void )	//run in UART_ISR - thread mode
+xMBRTUTransmitFSM( void )	//run in UART_ISR - handler mode
 {
     BOOL            xNeedPoll = FALSE;
 

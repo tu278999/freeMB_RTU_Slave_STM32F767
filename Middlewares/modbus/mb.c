@@ -87,9 +87,6 @@ pxMBFrameCB pxMBFrameCBByteReceived;
 pxMBFrameCB pxMBFrameCBTransmitterEmpty;
 pxMBFrameCB pxMBPortCBTimerExpired;
 
-//BOOL( *pxMBFrameCBReceiveFSMCur ) ( void );
-//BOOL( *pxMBFrameCBTransmitFSMCur ) ( void );
-
 /* An array of Modbus functions handlers which associates Modbus function
  * codes with implementing functions.
  */
@@ -357,7 +354,7 @@ eMBPoll( void )
             break;
 
         case EV_FRAME_RECEIVED:
-            eStatus = peMBFrameReceiveCur( &ucRcvAddress, &ucMBFrame, &usLength );
+            eStatus = peMBFrameReceiveCur( &ucRcvAddress, &ucMBFrame, &usLength );//get PDU frame
             if( eStatus == MB_ENOERR )
             {
                 /* Check if the frame is for us. If not ignore the frame. */
@@ -396,8 +393,8 @@ eMBPoll( void )
                     ucMBFrame[usLength++] = ( UCHAR )( ucFunctionCode | MB_FUNC_ERROR );
                     ucMBFrame[usLength++] = eException;
                 }
-               // if( ( eMBCurrentMode == MB_ASCII ) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS )
-               // {
+                // if( ( eMBCurrentMode == MB_ASCII ) && MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS )
+                // {
                 //    vMBPortTimersDelay( MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS );
                 //}
                 eStatus = peMBFrameSendCur( ucMBAddress, ucMBFrame, usLength );

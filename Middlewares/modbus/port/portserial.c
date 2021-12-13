@@ -50,14 +50,16 @@ vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable )
   */
   
   if (xRxEnable) {        
-	  SET_BIT((&huartused)->Instance->CR1, ( USART_CR1_RXNEIE) );
+	  SET_BIT((&uartslave)->Instance->CR1, ( USART_CR1_RXNEIE) );
+	  	  	  	  	  	  	  	  // PC2 <=> RE ........Receiver Output Enable (Low to enable)
   } else {    
-	 CLEAR_BIT((&huartused)->Instance->CR1, ( USART_CR1_RXNEIE) );
+	 CLEAR_BIT((&uartslave)->Instance->CR1, ( USART_CR1_RXNEIE) );
   }
   if (xTxEnable) {    
-	  SET_BIT((&huartused)->Instance->CR1, USART_CR1_TXEIE);
+	  SET_BIT((&uartslave)->Instance->CR1, USART_CR1_TXEIE);
+	  	  	  	  	  	  	  	 // PC3 <=> DE……….Driver Output Enable (high to enable)
   } else {
-	  CLEAR_BIT((&huartused)->Instance->CR1, USART_CR1_TXEIE);
+	  CLEAR_BIT((&uartslave)->Instance->CR1, USART_CR1_TXEIE);
   }  
   
 }
@@ -83,9 +85,9 @@ xMBPortSerialPutByte( CHAR ucByte )
   /* Put a byte in the UARTs transmit buffer. This function is called
   * by the protocol stack if pxMBFrameCBTransmitterEmpty( ) has been
   * called. */
-	huartused.Instance->TDR = (uint8_t)(ucByte & 0xFFU);
+	uartslave.Instance->TDR = (uint8_t)(ucByte & 0xFFU);
 	return TRUE;
-  //return (HAL_OK == HAL_UART_Transmit(&huartused, (uint8_t*)&ucByte, 1, 10));
+  //return (HAL_OK == HAL_UART_Transmit(&uartslave, (uint8_t*)&ucByte, 1, 10));
 }
  
 BOOL
@@ -94,7 +96,7 @@ xMBPortSerialGetByte( CHAR * pucByte )
   /* Return the byte in the UARTs receive buffer. This function is called
   * by the protocol stack after pxMBFrameCBByteReceived( ) has been called.
   */
-  *pucByte = (uint8_t)(huartused.Instance->RDR & (uint8_t)0x00FF);
+  *pucByte = (uint8_t)(uartslave.Instance->RDR & (uint8_t)0x00FF);
   return TRUE;
 }
  
@@ -111,8 +113,8 @@ void USART3_IRQHandler(void){
 
   /* USER CODE BEGIN USART2_IRQn 0 */
 
-	uint32_t isrflags   = READ_REG(huartused.Instance->ISR);
-	uint32_t cr1its     = READ_REG(huartused.Instance->CR1);
+	uint32_t isrflags   = READ_REG(uartslave.Instance->ISR);
+	uint32_t cr1its     = READ_REG(uartslave.Instance->CR1);
 
     if ( ((isrflags & USART_ISR_RXNE) != 0U)
          && ((cr1its & USART_CR1_RXNEIE) != 0U) )
@@ -121,22 +123,22 @@ void USART3_IRQHandler(void){
 		  pxMBFrameCBByteReceived();	  //xMBRTUReceiveFSM() in mbrtu.c
 
 //		  __IO uint32_t tmpreg = 0x00U;
-//		  tmpreg = (&huartused)->Instance->ISR;
-//		  tmpreg = (&huartused)->Instance->RDR;
-		  SET_BIT((&huartused)->Instance->RQR,  USART_RQR_RXFRQ );
+//		  tmpreg = (&uartslave)->Instance->ISR;
+//		  tmpreg = (&uartslave)->Instance->RDR;
+		  SET_BIT((&uartslave)->Instance->RQR,  USART_RQR_RXFRQ);
 //		  (void) tmpreg;
 
 		return;
     }
 
-  if((__HAL_UART_GET_FLAG(&huartused, UART_FLAG_TXE) != RESET) &&(__HAL_UART_GET_IT_SOURCE(&huartused, UART_IT_TXE) != RESET)) {
+  if((__HAL_UART_GET_FLAG(&uartslave, UART_FLAG_TXE) != RESET) &&(__HAL_UART_GET_IT_SOURCE(&uartslave, UART_IT_TXE) != RESET)) {
 
 	  pxMBFrameCBTransmitterEmpty(); 	  //xMBRTUTransmitFSM() in mbrtu.c
 
     return ;
   }
 
-  HAL_UART_IRQHandler(&huartused);
+  HAL_UART_IRQHandler(&uartslave);
 
 }
 
